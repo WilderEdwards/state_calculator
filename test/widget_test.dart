@@ -1,30 +1,54 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:state_calculator/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('Calculator smoke test: running total and AC reset',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Display starts at 0.
+    expect(find.byKey(const Key('calc-display')), findsOneWidget);
+    expect(find.text('0'), findsWidgets);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // 2 + 3 × 4 = → 20 (left-to-right running total).
+    await tester.tap(find.text('2'));
     await tester.pump();
+    await tester.tap(find.text('+'));
+    await tester.pump();
+    await tester.tap(find.text('3'));
+    await tester.pump();
+    // After entering the second operand and choosing ×, 2 + 3 commits.
+    await tester.tap(find.text('×'));
+    await tester.pump();
+    expect(find.text('5'), findsWidgets);
+    await tester.tap(find.text('4'));
+    await tester.pump();
+    await tester.tap(find.text('='));
+    await tester.pump();
+    expect(find.text('20'), findsWidgets);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // AC resets everything.
+    await tester.tap(find.text('AC'));
+    await tester.pump();
+    expect(find.text('0'), findsWidgets);
+  });
+
+  testWidgets('Operator replacement: 9 + × 2 = → 18',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.text('9'));
+    await tester.pump();
+    await tester.tap(find.text('+'));
+    await tester.pump();
+    await tester.tap(find.text('×'));
+    await tester.pump();
+    await tester.tap(find.text('2'));
+    await tester.pump();
+    await tester.tap(find.text('='));
+    await tester.pump();
+    expect(find.text('18'), findsWidgets);
   });
 }
