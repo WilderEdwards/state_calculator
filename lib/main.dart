@@ -81,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             tooltip: widget.isDark ? 'Switch to light theme' : 'Switch to dark theme',
+            style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
             icon: Icon(widget.isDark ? Icons.light_mode : Icons.dark_mode),
             onPressed: widget.onToggleTheme,
           ),
@@ -134,19 +135,21 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
-            Text(
-              _model.display,
-              key: const Key('calc-display'),
-              style: TextStyle(
-                fontSize: 48,
-                fontFamily: 'Courier',
-                fontFamilyFallback: const ['monospace'],
-                color: _model.hasError
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+            ExcludeSemantics(
+              child: Text(
+                _model.display,
+                key: const Key('calc-display'),
+                style: TextStyle(
+                  fontSize: 48,
+                  fontFamily: 'Courier',
+                  fontFamilyFallback: const ['monospace'],
+                  color: _model.hasError
+                      ? Theme.of(context).colorScheme.error
+                      : null,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
             if (_model.hasError)
               Text(
@@ -163,6 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildButtonGrid() {
     return Column(
+      key: const Key('calc-grid'),
       children: [
         _buttonRow([
           _calcButton(label: 'AC', semanticLabel: 'All clear', onPressed: _onClear),
@@ -273,6 +277,7 @@ class _MyHomePageState extends State<MyHomePage> {
     bool isEquals = false,
   }) {
     return _CalcButton(
+      key: Key('calc-key-$label'),
       label: label,
       semanticLabel: semanticLabel ?? label,
       onPressed: onPressed,
@@ -287,6 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
 /// same way without lag.
 class _CalcButton extends StatefulWidget {
   const _CalcButton({
+    super.key,
     required this.label,
     required this.semanticLabel,
     required this.onPressed,
@@ -335,9 +341,13 @@ class _CalcButtonState extends State<_CalcButton> {
             button: true,
             label: widget.semanticLabel,
             child: Center(
-              child: Text(
-                widget.label,
-                style: TextStyle(fontSize: 24, color: foreground),
+              // Excluded so screen readers announce the semantic label
+              // exactly once instead of label + visible glyph.
+              child: ExcludeSemantics(
+                child: Text(
+                  widget.label,
+                  style: TextStyle(fontSize: 24, color: foreground),
+                ),
               ),
             ),
           ),
